@@ -64,5 +64,12 @@
     "auto_file_verified_bible": true,
     "bible_requires_owner": false
   },
-  "repositories": {}
+  "repositories": {},
+  "updates": {
+    "enabled": true,
+    "repository": "klole/openclaw-foundation",
+    "channel": "stable",
+    "interval_seconds": 86400,
+    "token_env": ""
+  }
 }

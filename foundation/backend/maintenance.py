@@ -151,4 +151,17 @@ def hq(root):
     incidents=''.join('<li>'+html.escape(i['owner']+': '+i['reason'])+'</li>' for i in state['incidents'].values() if i['status']=='open')
     context=read(safe(root,'company/context/current.json'),{'facts':{},'gaps':[],'conflicts':[]})
     body='<!doctype html><html lang="en"><meta charset="utf-8"><title>Company HQ</title><style>body{font:16px system-ui;margin:2rem;background:#f5f6f8;color:#17202a}table{border-collapse:collapse;width:100%;background:white}td,th{padding:.8rem;border:1px solid #ddd;text-align:left}code{white-space:pre-wrap}h1{font-size:2rem}</style><h1>'+html.escape(cfg['company_name'])+' HQ</h1><p>Local snapshot: '+html.escape(now())+'. Refresh with foundation hq. Operator commands handle approvals.</p><p>Context: '+str(len(context['facts']))+' facts; '+str(len(context.get('gaps',[])))+' gaps; '+str(len(context.get('conflicts',[])))+' conflicts.</p><h2>Jobs</h2><table><tr><th>ID<th>Kind<th>Goal<th>Status<th>Stage<th>Issue</tr>'+''.join(rows)+'</table><h2>Open incidents</h2><ul>'+incidents+'</ul><h2>Usage reservations</h2><code>'+html.escape(json.dumps(state['usage'],indent=2))+'</code></html>'
+    update=read(safe(root,'state/updates.json'),{})
+    from .updates import settings, semver
+    from .core import config
+    update_cfg=settings(config(root)); installed=read(safe(root,'.foundation/state.json'))['version']
+    release=update.get('release')
+    notice='<h2>Foundation updates</h2><p>Daily checks: '+('enabled' if update_cfg['enabled'] else 'disabled')+'. Installed: '+html.escape(installed)+'.</p>'
+    if update_cfg['enabled'] and release and release['repository']==update_cfg['repository'] and release['channel']==update_cfg['channel'] and semver(release['version'])>semver(installed):
+        url='https://github.com/'+update_cfg['repository']+'/releases/tag/v'+release['version']
+        import shlex
+        fetch=shlex.join(['python3',str(Path(root).absolute()/'foundation'),'fetch-update','--version',release['version']])
+        notice+='<p><strong>Update available: '+html.escape(release['version'])+'</strong>. Review the release and ask the operator to fetch, preview and approve installation.</p><p><a href="'+html.escape(url,quote=True)+'" target="_blank" rel="noopener noreferrer">View release notes</a></p><pre>'+html.escape(release['notes'])+'</pre><code>'+html.escape(fetch)+'</code>'
+    if update.get('error'): notice+='<p>'+html.escape(update['error'])+'</p>'
+    body=body.replace('</html>',notice+'</html>')
     p=safe(root,'generated/hq.html'); atomic(p,body.encode()); return {'hq':str(p),'jobs':len(rows)}

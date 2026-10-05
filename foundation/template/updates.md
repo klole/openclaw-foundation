@@ -1,5 +1,45 @@
 # Update, rollback and recovery
 
+## Daily GitHub updates
+
+The foundation checks `klole/openclaw-foundation` releases once every 24 hours while `serve` runs. It sends only GitHub metadata/download requests; no company context or usage records leave the installation. A newer release adds one COS inbox notice and an update panel in the local HQ. The COS tells its owner; the owner fetches, previews and approves installation. No external email/chat integration is assumed. A checker alone does not activate the worker or send an external notification.
+
+The default `updates` settings in config/backend.json are:
+
+```json
+{"enabled": true, "repository": "klole/openclaw-foundation", "channel": "stable", "interval_seconds": 86400, "token_env": ""}
+```
+
+`stable` ignores prereleases and drafts. `preview` includes published prereleases for test installations. During the initial candidate period there is no stable release: stable copies simply report no available release. Change the channel to preview to try 2.1.0-rc.1. Setting enabled=false stops network checks. Existing config files receive these defaults at runtime without being overwritten. Checks target the highest packaged semantic version among the 100 most recent releases; unpublished tags and unfinished PRs are ignored. GitHub outages retain the last known notice, wait until the next daily attempt, and do not stop company work. `--force` retries immediately.
+
+```sh
+python3 /absolute/path/company/foundation check-updates --force
+python3 /absolute/path/company/foundation fetch-update --version 2.1.0-rc.1
+```
+
+Fetch downloads only a published release on the configured channel, verifies SHA256SUMS, a GitHub asset digest when available, archive checksums and its exact version, then caches it privately in state/updates/downloads. It prints the exact preview and apply commands. It never installs code. Review release notes and stop the worker before preview/apply; save a private application backup. The ordinary `update --bundle ... --apply` command is the explicit owner approval. After applying, use migrate, provision preview/apply, restart the gateway, verify seats and restart the worker as described below. The template updater updates the foundation; upgrades to the OpenClaw executable use that project's normal update process.
+
+Checksums detect alteration relative to the GitHub release, and HTTPS/account access establishes the source. They are not an independent publisher signature. Trust repository write access; require reviewed changes and protect maintainer accounts. Downloads refuse arbitrary URLs and drop authorization on cross-host GitHub redirects. For a private repository, set token_env to the name of a local environment variable containing a fine-grained GitHub token with repository Contents read access. Never put the token itself in backend.json; the host supervisor must provide that environment variable. Public installs need no token.
+
+## Run the checker while the worker is stopped
+
+`serve` already performs daily checks. For installations that stop the worker regularly, generate a separate host checker:
+
+```sh
+python3 /absolute/path/company/foundation update-service-files
+```
+
+This writes scheduler files and reports their paths; it does not activate them. Pick one option for the installation. Both schedulers and the worker share a lock and persisted check time, so they do not duplicate notices.
+
+On macOS, copy the reported org.openclaw.foundation-updates.COMPANY-ID.plist to ~/Library/LaunchAgents, then load that exact plist with `launchctl bootstrap gui/$(id -u) <absolute-plist-path>`. It runs at load and every 24 hours while that user's host session is active. `launchctl bootout gui/$(id -u) <absolute-plist-path>` disables it. Do not share plist files between company roots.
+
+On Linux, copy the reported service and timer to ~/.config/systemd/user, run `systemctl --user daemon-reload`, then `systemctl --user enable --now foundation-update-check.COMPANY-ID.timer`. Disable with `systemctl --user disable --now foundation-update-check.COMPANY-ID.timer`. A logged-out user needs systemd user lingering configured by the host operator. The generated service/timer names include company_id so multiple companies in one OS account have separate schedules. Use unique company IDs and inspect service paths before activation.
+
+## Publishing improvements
+
+Make each improvement on a codex/ branch, open a PR, pass CI and obtain independent review. Change VERSION in foundation/foundation.py and add the exact version to foundation/CHANGELOG.md before a release. Use a prerelease suffix while testing. After the PR is merged, run GitHub Actions → Prepare release on main. It tests, packages the neutral source, and creates a draft release with an executable ZIP and SHA256SUMS. Review and publish the draft when ready. Each installation detects that published release within a day. Frequent merges do not require a release for every commit; publish when an improvement is ready to distribute. Never replace an existing published version's assets.
+
+
 ## Updating one or many copies
 
 Maintain one neutral source and distribute one immutable archive/version/checksum. Apply it independently to each configured root on either host. Roots retain their own config, company context, Bible, custom agents, work, memory, queues, approvals, incidents and budgets. Never distribute an installed company directory as a template.

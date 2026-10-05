@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.1.0-rc.1 — 2026-10-05
+
+- Public, company-neutral source repository with clean history and reviewable changes.
+- Daily GitHub release checks with stable/preview channels, one COS notice per version and an escaped HQ update panel.
+- Verified archive download with checksums, GitHub asset digest checking, bounded HTTPS redirects and scoped private-repository token support.
+- Owner-approved preview/apply/rollback; no automatic code execution, gateway changes or restarts from a release check.
+- Daily launchd/systemd checker generators work independently of the model worker.
+- CI on Python 3.9/3.13 and a draft-release workflow, plus offline updater regression checks.
+
 ## 2.0.1 — 2026-10-05
 
 - Restricted agent research imports to scoped work files and explicitly published context exports; agent notes cannot assert primary measurement provenance.

@@ -1,0 +1,29 @@
+name: Prepare release
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: foundation-release
+  cancel-in-progress: false
+jobs:
+  release:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: python -m unittest discover -s foundation/tests -v
+      - run: python tools/build_distribution.py --output dist
+      - name: Create draft for owner publication
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          version=$(cat dist/VERSION)
+          options=()
+          if [[ "$version" == *-* ]]; then options+=(--prerelease); fi
+          gh release create "v$version" dist/*.zip dist/SHA256SUMS --target "$GITHUB_SHA" --draft "${options[@]}" --title "OpenClaw Foundation $version" --notes-file dist/RELEASE-NOTES.md
