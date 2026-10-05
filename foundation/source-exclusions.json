@@ -1,0 +1,4 @@
+{
+  "scope": "Build-time fixture marker exclusions; never included in installation archives.",
+  "pattern": "(?i)(source-private-marker|private-company-fixture)"
+}

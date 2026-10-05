@@ -1,0 +1,217 @@
+{
+  "schema": 1,
+  "agents": [
+    {
+      "id": "cos",
+      "title": "Company Chief of Staff",
+      "type": "chief-of-staff",
+      "reports_to": "owner",
+      "model_class": "coordinator",
+      "spawn": [
+        "plumber",
+        "ops-watcher",
+        "librarian",
+        "trainer",
+        "push-queue",
+        "rp-researcher",
+        "rp-director",
+        "rp-challenger",
+        "rp-breaker",
+        "rp-planner",
+        "rp-verifier",
+        "judge",
+        "release-gate",
+        "tool-scout"
+      ],
+      "activation": "on-demand",
+      "essential": true
+    },
+    {
+      "id": "plumber",
+      "title": "Systems Engineer",
+      "type": "specialized",
+      "reports_to": "cos",
+      "model_class": "coding",
+      "spawn": [
+        "plumber"
+      ],
+      "activation": "on-demand",
+      "essential": true
+    },
+    {
+      "id": "ops-watcher",
+      "title": "Operations Watcher",
+      "type": "specialized",
+      "reports_to": "cos",
+      "model_class": "worker",
+      "spawn": [],
+      "activation": "on-demand",
+      "essential": true
+    },
+    {
+      "id": "librarian",
+      "title": "Company Context and Bible Keeper",
+      "type": "specialized",
+      "reports_to": "cos",
+      "model_class": "worker",
+      "spawn": [
+        "context-numbers",
+        "context-watcher",
+        "daily-company-recorder"
+      ],
+      "activation": "on-demand",
+      "essential": true
+    },
+    {
+      "id": "trainer",
+      "title": "Agent Builder and Trainer",
+      "type": "specialized",
+      "reports_to": "cos",
+      "model_class": "coordinator",
+      "spawn": [],
+      "activation": "on-demand",
+      "essential": true
+    },
+    {
+      "id": "push-queue",
+      "title": "Change Reviewer",
+      "type": "specialized",
+      "reports_to": "cos",
+      "model_class": "reviewer",
+      "spawn": [],
+      "activation": "on-demand",
+      "essential": true
+    },
+    {
+      "id": "context-numbers",
+      "title": "Live Metrics Context Worker",
+      "type": "control",
+      "reports_to": "librarian",
+      "model_class": "worker",
+      "spawn": [],
+      "activation": "on-demand",
+      "essential": false
+    },
+    {
+      "id": "context-watcher",
+      "title": "Current State Context Worker",
+      "type": "control",
+      "reports_to": "librarian",
+      "model_class": "worker",
+      "spawn": [],
+      "activation": "on-demand",
+      "essential": false
+    },
+    {
+      "id": "daily-company-recorder",
+      "title": "Daily Company Recorder",
+      "type": "control",
+      "reports_to": "librarian",
+      "model_class": "worker",
+      "spawn": [],
+      "activation": "on-demand",
+      "essential": false
+    },
+    {
+      "id": "rp-researcher",
+      "title": "Researcher",
+      "type": "control",
+      "reports_to": "rp-director",
+      "model_class": "research",
+      "spawn": [],
+      "activation": "on-demand",
+      "essential": false
+    },
+    {
+      "id": "rp-director",
+      "title": "Research Director",
+      "type": "control",
+      "reports_to": "cos",
+      "model_class": "research",
+      "spawn": [],
+      "activation": "on-demand",
+      "essential": false
+    },
+    {
+      "id": "rp-challenger",
+      "title": "Research Challenger",
+      "type": "control",
+      "reports_to": "cos",
+      "model_class": "reviewer",
+      "spawn": [],
+      "activation": "on-demand",
+      "essential": false
+    },
+    {
+      "id": "rp-breaker",
+      "title": "Research Breaker",
+      "type": "control",
+      "reports_to": "cos",
+      "model_class": "reviewer",
+      "spawn": [],
+      "activation": "on-demand",
+      "essential": false
+    },
+    {
+      "id": "rp-planner",
+      "title": "Planner",
+      "type": "control",
+      "reports_to": "cos",
+      "model_class": "coordinator",
+      "spawn": [],
+      "activation": "on-demand",
+      "essential": false
+    },
+    {
+      "id": "rp-verifier",
+      "title": "Plan Verifier",
+      "type": "control",
+      "reports_to": "cos",
+      "model_class": "reviewer",
+      "spawn": [],
+      "activation": "on-demand",
+      "essential": false
+    },
+    {
+      "id": "judge",
+      "title": "Task and Evidence Judge",
+      "type": "control",
+      "reports_to": "cos",
+      "model_class": "reviewer",
+      "spawn": [],
+      "activation": "on-demand",
+      "essential": true
+    },
+    {
+      "id": "release-gate",
+      "title": "Independent Release Challenger",
+      "type": "control",
+      "reports_to": "cos",
+      "model_class": "reviewer",
+      "spawn": [],
+      "activation": "on-demand",
+      "essential": true
+    },
+    {
+      "id": "tool-scout",
+      "title": "Tool and Integration Scout",
+      "type": "specialized",
+      "reports_to": "cos",
+      "model_class": "research",
+      "spawn": [],
+      "activation": "on-demand",
+      "essential": false
+    }
+  ],
+  "service_contracts": [
+    "builder",
+    "research",
+    "judge",
+    "release-gate",
+    "merge-gate",
+    "context-collector",
+    "ops-monitor",
+    "wake-scheduler",
+    "budget-guard"
+  ]
+}

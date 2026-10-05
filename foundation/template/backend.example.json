@@ -1,0 +1,68 @@
+{
+  "schema": 1,
+  "native": {
+    "enabled": false,
+    "paid": true,
+    "binary": "openclaw",
+    "config_path": "",
+    "state_dir": "",
+    "env_path": ""
+  },
+  "limits": {
+    "daily_turns": 100,
+    "daily_reserved_tokens": 10000000,
+    "max_job_turns": 40,
+    "max_concurrent_jobs": 4,
+    "reserve_tokens_per_turn": 100000,
+    "turn_seconds": 180,
+    "max_attempts": 3,
+    "retry_seconds": 60,
+    "lease_seconds": 300,
+    "max_sources": 30,
+    "max_prompt_chars": 500000
+  },
+  "paid_calls": {
+    "enabled": false,
+    "daily_usd": 0,
+    "max_usd_per_turn": 0
+  },
+  "thresholds": {
+    "approval_confidence": 0.6,
+    "stall_seconds": 7200
+  },
+  "research": {
+    "angles": [
+      "baseline",
+      "cases",
+      "failures",
+      "objection"
+    ],
+    "max_rounds": 3,
+    "verifiers": 3,
+    "required_model_families": [],
+    "verifier_models": []
+  },
+  "wake": {
+    "enabled": false,
+    "cadence": {
+      "URGENT": 300,
+      "INTENSE": 900,
+      "BUILDING": 1800,
+      "PREPARING": 3600,
+      "STEADY": 10800,
+      "QUIET": 21600,
+      "DORMANT": 43200
+    }
+  },
+  "hygiene": {
+    "memory_days": 2,
+    "notes_days": 7,
+    "goals_chars": 4000,
+    "open_words": 300
+  },
+  "context": {
+    "auto_file_verified_bible": true,
+    "bible_requires_owner": false
+  },
+  "repositories": {}
+}

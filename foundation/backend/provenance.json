@@ -1,0 +1,26 @@
+{
+  "method": "Retain deterministic claim/quote/arithmetic/plan checks. Replace only evidence imports and configurable ladder default. No company records exported.",
+  "files": [
+    {
+      "source": "research-planner/planner/claims.py",
+      "sha256": "e85d7cc1ac171f80f8221a787cf0d71ce7441f1e4182832076ea6157c597ab07",
+      "port": "backend/claims.py"
+    },
+    {
+      "source": "research-planner/planner/plan_gate.py",
+      "sha256": "8183e44efe45daf634737a638b4d1a633814f2803c3d5df8bd5fdb9ea15f4059",
+      "port": "backend/plan_gate.py"
+    },
+    {
+      "source": "research-planner/planner/evidence.py",
+      "sha256": "7066170f5af05f911fc070768e047a9f88fd4d787c1712cecb8d9107b0aa787a",
+      "port": "backend/evidence_core.py",
+      "definitions": [
+        "Snapshot",
+        "absence_check",
+        "normalize",
+        "sha256"
+      ]
+    }
+  ]
+}
