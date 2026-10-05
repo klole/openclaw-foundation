@@ -19,7 +19,8 @@ DEFAULT={
  'wake':{'enabled':False,'cadence':{'URGENT':300,'INTENSE':900,'BUILDING':1800,'PREPARING':3600,'STEADY':10800,'QUIET':21600,'DORMANT':43200}},
  'hygiene':{'memory_days':2,'notes_days':7,'goals_chars':4000,'open_words':300},
  'context':{'auto_file_verified_bible':True,'bible_requires_owner':False},
- 'repositories':{}
+ 'repositories':{},
+ 'updates':{'enabled':True,'repository':'klole/openclaw-foundation','channel':'stable','interval_seconds':86400,'token_env':''}
 }
 def config(root):
     supplied=read(safe(root,'config/backend.json'),{})

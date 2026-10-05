@@ -20,7 +20,7 @@ There are 18 on-demand seats, plus the optional portfolio COS. Domain-specific e
 Fill `company.example.json` with company identity, owner, timezone, names and model routes. The archive installs directly:
 
 ```sh
-python3 /absolute/path/openclaw-foundation-2.0.1.zip init --config /absolute/path/company.json --root /absolute/path/new-company
+python3 /absolute/path/openclaw-foundation-2.1.0-rc.1.zip init --config /absolute/path/company.json --root /absolute/path/new-company
 python3 /absolute/path/new-company/foundation doctor
 ```
 
@@ -40,17 +40,14 @@ Native calls remain disabled until provisioning and target credentials are ready
 
 ## Update a copy
 
-Stop its foundation worker and save a private backup, then preview/apply a trusted new archive:
+The running foundation service checks GitHub for newer releases once a day. It shows an update notice in HQ and sends one local COS inbox notice per version. An operator approves installation after reviewing the release notes. The default stable channel ignores drafts and previews. An independent daily host checker can run when the model worker is stopped.
 
 ```sh
-python3 /absolute/path/new-company/foundation update --bundle /absolute/path/openclaw-foundation-2.1.0.zip
-python3 /absolute/path/new-company/foundation update --bundle /absolute/path/openclaw-foundation-2.1.0.zip --apply
-python3 /absolute/path/new-company/foundation migrate --apply
-python3 /absolute/path/new-company/foundation provision
-python3 /absolute/path/new-company/foundation provision --apply
+python3 /absolute/path/new-company/foundation check-updates --force
+python3 /absolute/path/new-company/foundation fetch-update
 ```
 
-Managed edits cause conflicts rather than silent overwrites. Company data, custom agents, memories and runtime queues are preserved. Gateway provisioning has its own validated preview and compare-before-write rollback receipt. Restart the target gateway after changed agent config, verify fresh seat readbacks, then restart the worker. [Updates](updates.md) explains upgrades, rollback and recovery.
+Fetch verifies the archive and prints exact preview/apply commands. Stop the worker, save a private backup, preview, then apply. Company facts, memories, custom agents and runtime records are preserved; edited managed files cause conflicts. Native provision/restart and readiness checks remain separate. See [updates](updates.md) for stable/preview channels, daily host scheduling, recovery and rollout.
 
 ## Maintain the foundation
 

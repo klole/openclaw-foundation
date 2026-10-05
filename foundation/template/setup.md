@@ -36,3 +36,7 @@ Alternatively fill a reviewed blueprint manually, for example:
 Declared tools are granted exactly from the built-in safe file/memory set. Additional external tools require a reviewed adapter/provisioning extension. Manually authored agents still need held-out tests, tool proofs and plan approval; rendering alone is not onboarding.
 
 Set portfolio true to add a portfolio COS reporting to the owner. Cross-company routing is a separately authorized broker with scoped routes and credentials. This package does not silently connect company gateways or centralize their private context.
+
+## Release checker
+
+Daily GitHub checks are enabled by default and run inside serve; they make no model calls and install nothing. Use updates.md to choose the stable or preview channel, generate an independent host checker, and fetch a verified release for owner-approved installation. Early candidates require the preview channel.

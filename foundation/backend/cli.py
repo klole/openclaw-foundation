@@ -10,7 +10,7 @@ import time
 from .common import ServiceError, Store, atomic, event, json_bytes, now, read, safe
 from .core import Runtime, config
 
-COMMANDS=('submit','approve','tick','status','retry','collect','packet','monitor','incident-resolve','wake','schedule','bridge','backup','restore','restore-native','hygiene','hq','provision','provision-rollback','service-files','serve','activate','merge','manager-plan','bible-apply','migrate')
+COMMANDS=('submit','approve','tick','status','retry','collect','packet','monitor','incident-resolve','wake','schedule','bridge','backup','restore','restore-native','hygiene','hq','provision','provision-rollback','service-files','serve','activate','merge','manager-plan','bible-apply','migrate','check-updates','fetch-update','update-service-files')
 def parsers(sub):
     for command in COMMANDS:
         p=sub.add_parser(command); p.add_argument('--root',required=True)
@@ -24,7 +24,9 @@ def parsers(sub):
         if command=='backup': p.add_argument('--output',required=True); p.add_argument('--native',action='store_true')
         if command in ('restore','restore-native'): p.add_argument('--archive',required=True); p.add_argument('--destination',required=True)
         if command=='provision-rollback': p.add_argument('--receipt',required=True)
-        if command=='service-files': p.add_argument('--python',default=sys.executable)
+        if command in ('service-files','update-service-files'): p.add_argument('--python',default=sys.executable)
+        if command=='check-updates': p.add_argument('--force',action='store_true')
+        if command=='fetch-update': p.add_argument('--version')
         if command in ('provision','provision-rollback','restore','restore-native','activate','merge','manager-plan','bible-apply','migrate'): p.add_argument('--apply',action='store_true')
         if command=='serve': p.add_argument('--poll',type=int,default=30); p.add_argument('--once',action='store_true')
 
@@ -52,9 +54,9 @@ def activate(root,jid,apply=False):
     return {'job':jid,'status':'queued','stage':'onboarding','helper_jobs':children,'native_enabled':runtime.cfg['native']['enabled']}
 
 def cycle(runtime):
-    from . import bridge,context,maintenance
+    from . import bridge,context,maintenance,updates
     out={'bridge':bridge.process(runtime),'context':context.collect(runtime.root),'monitor':runtime.monitor(),'wake':runtime.wake(),'schedule':runtime.schedule()}
-    out['tick']=runtime.tick(); out['hq']=maintenance.hq(runtime.root)
+    out['tick']=runtime.tick(); out['updates']=updates.check(runtime.root,runtime.cfg); out['hq']=maintenance.hq(runtime.root)
     if runtime.cfg['context']['auto_file_verified_bible']:
         for job in runtime.store.snapshot()['jobs'].values():
             if job['status']=='done' and job['payload'].get('bible_proposal') and not safe(runtime.root,'state/bible-receipts/'+job['id']+'.json').exists():
@@ -123,6 +125,15 @@ def dispatch(args):
     if command=='restore-native': return maintenance.restore_native(args.archive,args.destination,args.apply)
     if command=='hygiene': return maintenance.hygiene(root,runtime.cfg['hygiene'])
     if command=='hq': return maintenance.hq(root)
+    if command=='check-updates':
+        from . import updates
+        result=updates.check(root,runtime.cfg,args.force); maintenance.hq(root); return result
+    if command=='fetch-update':
+        from . import updates
+        return updates.fetch(root,runtime.cfg,args.version)
+    if command=='update-service-files':
+        from . import updates
+        return updates.service_files(root,args.python)
     if command=='provision': return deploy.provision(root,runtime.cfg,args.apply)
     if command=='provision-rollback': return deploy.provision_rollback(root,runtime.cfg,args.receipt,args.apply)
     if command=='service-files': return deploy.service_files(root,args.python)

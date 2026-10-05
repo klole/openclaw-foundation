@@ -74,7 +74,7 @@ class BackendTests(unittest.TestCase):
         self.bundle=self.base/'2.0.0.zip'
         with contextlib.redirect_stdout(io.StringIO()): f.build_release(SOURCE,self.bundle,'2.0.0')
         f.initialize(SimpleNamespace(root=self.root,config=cfg,bundle=self.bundle))
-        cfg=read(self.root/'config/backend.json'); cfg['native']['paid']=False; atomic(self.root/'config/backend.json',json_bytes(cfg))
+        cfg=read(self.root/'config/backend.json'); cfg['native']['paid']=False; cfg['updates']['enabled']=False; atomic(self.root/'config/backend.json',json_bytes(cfg))
         self.provider=Scripted(); self.runtime=Runtime(self.root,self.provider)
     def tearDown(self): self.temp.cleanup()
     def finish(self,jid,limit=50):
