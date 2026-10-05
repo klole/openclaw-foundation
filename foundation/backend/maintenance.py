@@ -158,7 +158,10 @@ def hq(root):
     release=update.get('release')
     notice='<h2>Foundation updates</h2><p>Daily checks: '+('enabled' if update_cfg['enabled'] else 'disabled')+'. Installed: '+html.escape(installed)+'.</p>'
     if update_cfg['enabled'] and release and release['repository']==update_cfg['repository'] and release['channel']==update_cfg['channel'] and semver(release['version'])>semver(installed):
-        notice+='<p><strong>Update available: '+html.escape(release['version'])+'</strong>. Review the release and ask the operator to fetch, preview and approve installation.</p><p>'+html.escape(release['url'])+'</p><pre>'+html.escape(release['notes'])+'</pre><code>python3 /path/to/company/foundation fetch-update --version '+html.escape(release['version'])+'</code>'
+        url='https://github.com/'+update_cfg['repository']+'/releases/tag/v'+release['version']
+        import shlex
+        fetch=shlex.join(['python3',str(Path(root).absolute()/'foundation'),'fetch-update','--version',release['version']])
+        notice+='<p><strong>Update available: '+html.escape(release['version'])+'</strong>. Review the release and ask the operator to fetch, preview and approve installation.</p><p><a href="'+html.escape(url,quote=True)+'" target="_blank" rel="noopener noreferrer">View release notes</a></p><pre>'+html.escape(release['notes'])+'</pre><code>'+html.escape(fetch)+'</code>'
     if update.get('error'): notice+='<p>'+html.escape(update['error'])+'</p>'
     body=body.replace('</html>',notice+'</html>')
     p=safe(root,'generated/hq.html'); atomic(p,body.encode()); return {'hq':str(p),'jobs':len(rows)}

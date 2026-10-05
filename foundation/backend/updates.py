@@ -84,13 +84,16 @@ def releases(cfg):
     return data
 
 def candidate(item, cfg):
+    if not isinstance(item, dict): return None
     if item.get('draft') or (item.get('prerelease') and cfg['channel'] != 'preview'): return None
-    version = item.get('tag_name', '').removeprefix('v')
+    if not isinstance(item.get('tag_name'), str): return None
+    version = item['tag_name'].removeprefix('v')
     try: semver(version)
     except (ServiceError, TypeError): return None
     if '-' in version and cfg['channel'] != 'preview': return None
     name = 'openclaw-foundation-' + version + '.zip'
-    assets = {a.get('name'): a for a in item.get('assets', [])}
+    if not isinstance(item.get('assets'), list) or any(not isinstance(a, dict) for a in item['assets']): return None
+    assets = {a.get('name'): a for a in item['assets']}
     if name not in assets or 'SHA256SUMS' not in assets: return None
     for filename in (name, 'SHA256SUMS'):
         asset = assets[filename]
@@ -190,12 +193,13 @@ def service_files(root, python):
     if any('\n' in s or '\r' in s or '%' in s for s in (str(root), python)): raise ServiceError('Unsupported service path')
     args = [python, str(root / 'foundation'), 'check-updates']
     label = 'org.openclaw.foundation-updates.' + read(safe(root, 'config/company.json'))['company_id']
+    unit = 'foundation-update-check.' + read(safe(root, 'config/company.json'))['company_id']
     paths = []
     # Standalone daily checker works even when the model worker is stopped.
     launch = {'Label': label, 'ProgramArguments': args, 'StartInterval': 86400, 'RunAtLoad': True,
               'StandardOutPath': str(root / 'state/update-check.log'), 'StandardErrorPath': str(root / 'state/update-check-error.log')}
     files = {'generated/' + label + '.plist': plistlib.dumps(launch),
-             'generated/foundation-update-check.service': ('[Unit]\nDescription=OpenClaw foundation release check\n[Service]\nType=oneshot\nExecStart=' + ' '.join('"' + s.replace('\\', '\\\\').replace('"', '\\"').replace('$', '$$') + '"' for s in args) + '\n').encode(),
-             'generated/foundation-update-check.timer': b'[Unit]\nDescription=Daily OpenClaw foundation update check\n[Timer]\nOnBootSec=5m\nOnUnitActiveSec=1d\nPersistent=true\n[Install]\nWantedBy=timers.target\n'}
+             'generated/' + unit + '.service': ('[Unit]\nDescription=OpenClaw foundation release check\n[Service]\nType=oneshot\nExecStart=' + ' '.join('"' + s.replace('\\', '\\\\').replace('"', '\\"').replace('$', '$$') + '"' for s in args) + '\n').encode(),
+             'generated/' + unit + '.timer': b'[Unit]\nDescription=Daily OpenClaw foundation update check\n[Timer]\nOnBootSec=5m\nOnUnitActiveSec=1d\n[Install]\nWantedBy=timers.target\n'}
     for name, data in files.items(): atomic(safe(root, name), data); paths.append(str(root / name))
     return {'files': paths, 'activated': False, 'note': 'Install the launchd job or systemd user timer as described in updates.md. Checks are also built into serve. Private repository tokens need the supervisor environment.'}

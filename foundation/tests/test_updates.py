@@ -114,6 +114,9 @@ class UpdateTests(unittest.TestCase):
         for version in ['2.0.0','2.1.0']:
             with patch.object(updates,'releases',return_value=[self.release(version)]):
                 with self.assertRaises(ServiceError): updates.fetch(self.root,self.cfg,version)
+    def test_manual_prerelease_downgrade_is_also_blocked(self):
+        older=self.build('2.1.0-rc.1')
+        with self.assertRaises(f.Error): f.update(SimpleNamespace(root=self.root,command='update',apply=True,bundle=older))
     def test_external_urls_and_invalid_sources_refused(self):
         item=self.release(); item['assets'][0]['browser_download_url']='https://example.com/payload.zip'
         with self.assertRaises(ServiceError): updates.candidate(item,updates.settings(self.cfg))

@@ -33,7 +33,7 @@ This writes scheduler files and reports their paths; it does not activate them. 
 
 On macOS, copy the reported org.openclaw.foundation-updates.COMPANY-ID.plist to ~/Library/LaunchAgents, then load that exact plist with `launchctl bootstrap gui/$(id -u) <absolute-plist-path>`. It runs at load and every 24 hours while that user's host session is active. `launchctl bootout gui/$(id -u) <absolute-plist-path>` disables it. Do not share plist files between company roots.
 
-On Linux, copy the reported service and timer to ~/.config/systemd/user, run `systemctl --user daemon-reload`, then `systemctl --user enable --now foundation-update-check.timer`. Disable with `systemctl --user disable --now foundation-update-check.timer`. A logged-out user needs systemd user lingering configured by the host operator. For multiple companies in one OS account, rename the service/timer to a unique pair and add `Unit=<unique-service-name>.service` to each timer's [Timer] section. Inspect service paths before activation.
+On Linux, copy the reported service and timer to ~/.config/systemd/user, run `systemctl --user daemon-reload`, then `systemctl --user enable --now foundation-update-check.COMPANY-ID.timer`. Disable with `systemctl --user disable --now foundation-update-check.COMPANY-ID.timer`. A logged-out user needs systemd user lingering configured by the host operator. The generated service/timer names include company_id so multiple companies in one OS account have separate schedules. Use unique company IDs and inspect service paths before activation.
 
 ## Publishing improvements
 

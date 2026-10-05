@@ -165,6 +165,8 @@ def bundle_read(path):
 def build_release(source, output, version):
     if not re.fullmatch(r'\d+\.\d+\.\d+(?:-[a-z0-9.-]+)?', version):
         raise Error('Use a semantic release version')
+    from backend.updates import semver
+    semver(version)
     payload = source_payload(source)
     validate_payload(payload)
     # Maintainer-only source exclusions are never distributed with the generic runtime.
@@ -431,9 +433,8 @@ def update(args):
         meta = {'version': old['version']}
     else:
         meta, payload = bundle_read(args.bundle)
-        def version_tuple(v):
-            return tuple(int(n) for n in v.split('-')[0].split('.'))
-        if version_tuple(meta['version']) < version_tuple(old['version']):
+        from backend.updates import semver
+        if semver(meta['version']) < semver(old['version']):
             raise Error('Use rollback for a downgrade')
         installed_release = {name[len(MANAGED):]: expected for name, expected in old['files'].items() if name.startswith(MANAGED)}
         if meta['version'] == old['version'] and installed_release != meta['files']:
