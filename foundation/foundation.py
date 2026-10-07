@@ -13,7 +13,7 @@ import sys
 import tempfile
 import zipfile
 
-VERSION = '2.2.0-rc.1'
+VERSION = '2.2.0-rc.2'
 # runpy launchers and ZIP execution both need sibling backend imports.
 sys.path.insert(0, str(Path(__file__).parent))
 MAX_FILE = 2 * 1024 * 1024

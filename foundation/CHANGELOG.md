@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.2.0-rc.2
+
+- Fix browser OAuth form submissions by preserving the origin header without exposing authorization query parameters in referrers.
+- Allow the exact ChatGPT callback in the login form's content security policy and return through an explicit POST-to-GET redirect. Origin, CSRF, PKCE and owner scope checks remain enforced.
+- Add a regression test covering browser login headers, rejected origins, invalid CSRF cookies and the authorization-code exchange. Preview pending independent review.
+
 ## 2.2.0-rc.1
 
 - Add an optional invite-only remote MCP messaging bridge for Dots on macOS and Linux, with per-owner OAuth code/PKCE login, rotating refresh tokens, scoped agent access and durable task receipts.

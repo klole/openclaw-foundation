@@ -10,7 +10,8 @@ import threading
 import time
 import unittest
 from unittest.mock import patch
-from urllib.parse import parse_qs, urlsplit
+from urllib.parse import parse_qs, urlsplit, urlencode
+import re
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from backend.common import ServiceError
 from backend.dot_auth import Database, OAuth, SCOPES, pkce, random
@@ -169,6 +170,30 @@ class DotTests(unittest.TestCase):
             conn.request('POST','/dot/mcp',json.dumps({'jsonrpc':'2.0','id':1,'method':'server/discover'}),{'Content-Type':'application/json'}); response=conn.getresponse(); result=json.loads(response.read()); self.assertEqual(result['result']['supportedVersions'],['2026-07-28'])
             conn.request('POST','/dot/mcp',json.dumps({'jsonrpc':'2.0','id':2,'method':'tools/call','params':{'name':'foundation_agents'}}),{'Content-Type':'application/json'}); response=conn.getresponse(); response.read(); self.assertEqual(response.status,401)
             conn.request('POST','/dot/mcp',json.dumps({'jsonrpc':'2.0','id':3,'method':'tools/call','params':{'name':'foundation_agents'}}),{'Content-Type':'application/json','Authorization':'Bearer '+self.tokens['access_token']}); response=conn.getresponse(); result=json.loads(response.read()); self.assertEqual(response.status,200); self.assertFalse(result['result']['isError'])
+        finally: server.shutdown(); server.server_close(); thread.join()
+
+    def test_browser_login_headers_origin_csrf_and_callback(self):
+        app=Application(self.config,self.store,self.oauth,self.events,self.bridge); server=Server(('127.0.0.1',0),app)
+        thread=threading.Thread(target=server.serve_forever,daemon=True); thread.start()
+        try:
+            conn=http.client.HTTPConnection('127.0.0.1',server.server_port)
+            verifier=random(); args={'client_id':self.client,'redirect_uri':'https://chatgpt.com/connector_platform_oauth_redirect','response_type':'code','resource':self.oauth.resource,'code_challenge_method':'S256','code_challenge':pkce(verifier),'state':'browser-fixture'}
+            conn.request('GET','/dot/authorize?'+urlencode(args)); response=conn.getresponse(); page=response.read().decode()
+            self.assertEqual(response.status,200)
+            self.assertEqual(response.getheader('Referrer-Policy'),'strict-origin')
+            self.assertIn("form-action 'self' https://chatgpt.com/connector_platform_oauth_redirect;",response.getheader('Content-Security-Policy'))
+            handle=re.search(r'name="handle" value="([^"]+)"',page).group(1)
+            cookie=response.getheader('Set-Cookie').split(';')[0]
+            body=urlencode({'handle':handle,'principal':'owner','password':self.password})
+            headers={'Content-Type':'application/x-www-form-urlencoded','Origin':'https://fixture.example','Cookie':cookie}
+            for bad_origin in ('null','https://attacker.example'):
+                conn.request('POST','/dot/authorize',body,dict(headers,Origin=bad_origin)); response=conn.getresponse(); response.read(); self.assertEqual(response.status,400)
+            conn.request('POST','/dot/authorize',body,dict(headers,Cookie='dot_login=wrong')); response=conn.getresponse(); response.read(); self.assertEqual(response.status,400)
+            conn.request('POST','/dot/authorize',body,headers); response=conn.getresponse(); response.read(); self.assertEqual(response.status,303)
+            destination=urlsplit(response.getheader('Location')); query=parse_qs(destination.query)
+            self.assertEqual(destination.hostname,'chatgpt.com'); self.assertEqual(destination.path,'/connector_platform_oauth_redirect'); self.assertEqual(query['state'],['browser-fixture'])
+            tokens=self.oauth.exchange({'grant_type':'authorization_code','resource':self.oauth.resource,'client_id':self.client,'code':query['code'][0],'redirect_uri':args['redirect_uri'],'code_verifier':verifier})
+            self.assertEqual(self.oauth.authenticate(tokens['access_token'])['principal'],'owner')
         finally: server.shutdown(); server.server_close(); thread.join()
 
 if __name__=='__main__': unittest.main()

@@ -69,7 +69,13 @@ class Handler(BaseHTTPRequestHandler):
                 app.store.rate('authorize',self.client_address[0],30)
                 handle,nonce=app.oauth.begin(self.form(query))
                 body='''<!doctype html><html lang="en"><meta charset="utf-8"><title>Connect your Dot</title><style>body{font:18px system-ui;max-width:560px;margin:60px auto;padding:24px}input,button{display:block;font:inherit;margin:12px 0;padding:12px}label{display:block}</style><h1>Connect your Dot to OpenClaw</h1><p>Use your private owner login. This grants agent discovery, messaging, your own replies and reply notifications. Agent actions keep their existing approval rules.</p><form method="post" action="%s"><input type="hidden" name="handle" value="%s"><label>Owner name<input name="principal" autocomplete="username" required maxlength="63"></label><label>Private connection password<input type="password" name="password" autocomplete="current-password" required maxlength="128"></label><button>Authorize this connection</button></form></html>'''%(html.escape(app.config['public_url']+'/authorize',quote=True),html.escape(handle,quote=True))
-                return self.reply(200,body,{'Set-Cookie':'dot_login='+nonce+'; Path=/; Secure; HttpOnly; SameSite=Strict'},raw=True)
+                # HTML form POSTs under no-referrer send Origin: null in browsers.
+                # Send only the HTTPS origin, never OAuth query parameters, while
+                # retaining origin validation. Chrome also checks form-action on
+                # the redirect destination, so permit only our fixed callback.
+                return self.reply(200,body,{'Set-Cookie':'dot_login='+nonce+'; Path=/; Secure; HttpOnly; SameSite=Strict',
+                    'Referrer-Policy':'strict-origin',
+                    'Content-Security-Policy':"default-src 'none'; style-src 'unsafe-inline'; form-action 'self' https://chatgpt.com/connector_platform_oauth_redirect; frame-ancestors 'none'; base-uri 'none'"},raw=True)
             if route in ('/','/connect'):
                 endpoint=html.escape(app.config['public_url']+'/mcp')
                 body='<html lang="en"><meta charset="utf-8"><title>OpenClaw Dot connection</title><h1>OpenClaw Dot connection</h1><p>In ChatGPT Plugins, add a custom MCP server with OAuth:</p><p>'+endpoint+'</p><p>Sign in using your own private owner credentials. Then ask your Dot to discover the agents and monitor foundation.task.updated for your conversation.</p></html>'
@@ -92,7 +98,7 @@ class Handler(BaseHTTPRequestHandler):
                 app.store.rate('login-global','all',60); app.store.rate('login',self.client_address[0],10)
                 params=self.form(raw); cookies=SimpleCookie(); cookies.load(self.headers.get('Cookie',''))
                 nonce=cookies.get('dot_login'); destination=app.oauth.consent(params['handle'],nonce.value if nonce else '',params['principal'],params['password'])
-                return self.reply(302,{}, {'Location':destination,'Set-Cookie':'dot_login=; Path=/; Max-Age=0; Secure; HttpOnly; SameSite=Strict'})
+                return self.reply(303,{}, {'Location':destination,'Set-Cookie':'dot_login=; Path=/; Max-Age=0; Secure; HttpOnly; SameSite=Strict'})
             if route!='/mcp': return self.reply(404,{'error':'Not found'})
             req=json.loads(raw)
             if not isinstance(req,dict) or req.get('jsonrpc')!='2.0' or not isinstance(req.get('method'),str): raise ServiceError('Invalid JSON-RPC')
