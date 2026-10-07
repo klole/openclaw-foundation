@@ -13,7 +13,7 @@ import sys
 import tempfile
 import zipfile
 
-VERSION = '2.1.0-rc.1'
+VERSION = '2.2.0-rc.1'
 # runpy launchers and ZIP execution both need sibling backend imports.
 sys.path.insert(0, str(Path(__file__).parent))
 MAX_FILE = 2 * 1024 * 1024
@@ -542,10 +542,15 @@ def main():
     from backend.cli import parsers, COMMANDS, dispatch
     from backend.common import ServiceError
     parsers(sub)
+    from backend import dot_cli
+    dot_cli.parsers(sub)
     args = ap.parse_args()
     try:
         if args.command == 'release':
             build_release(args.source, args.output, args.version)
+            return 0
+        if args.command in dot_cli.COMMANDS:
+            print(json.dumps(dot_cli.dispatch(args), indent=2))
             return 0
         result = dispatch(args) if args.command in COMMANDS else initialize(args) if args.command == 'init' else rollback(args) if args.command == 'rollback' else doctor(args) if args.command == 'doctor' else update(args)
         print(json.dumps(result, indent=2))

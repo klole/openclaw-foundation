@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.2.0-rc.1
+
+- Add an optional invite-only remote MCP messaging bridge for Dots on macOS and Linux, with per-owner OAuth code/PKCE login, rotating refresh tokens, scoped agent access and durable task receipts.
+- Add MCP Events subscriptions and signed reply notifications, public-address-pinned TLS callbacks, callback verification, filters, expiration, revocation and retry delivery.
+- Add operator setup, owner creation/revocation, service files, health checks and an installed Foundation runtime adapter. Separate owners may use their own authenticated messaging adapters for an existing team.
+- Add a GitHub-link setup prompt, private generated connection instructions and explicit account-consent/live-Dot verification steps. Live hosting and owner authorization remain required.
+- Existing company data, updater preview/apply/rollback and action gates remain local. Preview pending independent review.
+
 ## 2.1.0-rc.1 — 2026-10-05
 
 - Public, company-neutral source repository with clean history and reviewable changes.

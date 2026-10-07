@@ -2,10 +2,12 @@
 
 A reusable company-neutral foundation for OpenClaw on macOS and Linux. It includes COS and operating agents, department blueprints, context and Bible instructions, bounded workflows, a local HQ, and preview/apply/rollback updates. Each company supplies its own facts, credentials and provider connections.
 
+Give this repository link to your setup assistant with [START-HERE.md](START-HERE.md). For remote Dot messaging and reply notifications, follow [Dots setup](foundation/template/dots.md). Each owner connects and consents in ChatGPT.
+
 Download a packaged ZIP and SHA256SUMS from [Releases](https://github.com/klole/openclaw-foundation/releases), fill [company.example.json](foundation/template/company.example.json), then create a fresh company directory:
 
 ```sh
-python3 openclaw-foundation-2.1.0-rc.1.zip init --config /absolute/path/company.json --root /absolute/path/new-company
+python3 openclaw-foundation-2.2.0-rc.1.zip init --config /absolute/path/company.json --root /absolute/path/new-company
 python3 /absolute/path/new-company/foundation doctor
 ```
 

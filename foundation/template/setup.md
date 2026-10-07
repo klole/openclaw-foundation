@@ -40,3 +40,7 @@ Set portfolio true to add a portfolio COS reporting to the owner. Cross-company 
 ## Release checker
 
 Daily GitHub checks are enabled by default and run inside serve; they make no model calls and install nothing. Use updates.md to choose the stable or preview channel, generate an independent host checker, and fetch a verified release for owner-approved installation. Early candidates require the preview channel.
+
+## Dot messaging
+
+Optional remote messaging and reply events are configured with dots.md. Each owner uses a separate authenticated identity, and ChatGPT connection/consent is completed in the owner account.
